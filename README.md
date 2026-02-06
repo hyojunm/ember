@@ -1,7 +1,7 @@
 # Ember
 
 A progressive web app for decentralized resource distribution during
-natural disaster relief. 
+natural disaster relief.
 
 ## Build & Run
 
