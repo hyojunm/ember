@@ -13,7 +13,7 @@ body {
     background: #f4f4f4;
 }
 
-nav {
+nav.legacy-nav {
     background: var(--pgh-black);
     color: white;
     padding: 1rem;
@@ -24,7 +24,7 @@ nav {
     z-index: 2;
 }
 
-nav a {
+nav.legacy-nav a {
     color: var(--pgh-gold);
     text-decoration: none;
     font-weight: bold;

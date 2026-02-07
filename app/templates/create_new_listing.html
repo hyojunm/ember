@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ember - Create New Listing</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/static/css/main.css" />
 </head>
 <body class="min-h-screen relative overflow-hidden">
-    <!-- Background Image -->
-    <div class="fixed inset-0 z-0">
-        <img src="https://images.unsplash.com/photo-1486718448742-163732cd1544?w=1920" alt="Aerial view" class="w-full h-full object-cover">
-    </div>
+    <!-- Background Map -->
+    <div id="map" class="fixed inset-0 w-full h-full z-0"></div>
 
     <!-- Content -->
     <div class="relative z-10 min-h-screen">
@@ -293,6 +293,8 @@
             </main>
         </div>
     </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="/static/js/map.js"></script>
     <script>
         document.getElementById('profileBtn').addEventListener('click', function(e) {
             e.stopPropagation();

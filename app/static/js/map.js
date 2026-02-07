@@ -1,14 +1,20 @@
-// Initialize the map at a default location (or user's GPS)
+// Restore saved map position or use defaults
+const savedMap = JSON.parse(localStorage.getItem('emberMapView'));
+const mapCenter = savedMap ? [savedMap.lat, savedMap.lng] : [40.4406, -79.9959];
+const mapZoom = savedMap ? savedMap.zoom : 15;
+
 const map = L.map('map', {
-    center: [40.4406, -79.9959], // Starting coordinates
-    zoom: 15,                    // Starting zoom level (Neighborhood view)
+    center: mapCenter,
+    zoom: mapZoom,
     minZoom: 12,                 // Maximum zoom out (City view)
     maxZoom: 18,                 // Maximum zoom in (Street view)
-    // maxBounds: [                 // Optional: Lock the map to a specific area
-    //     [40.60, -74.20],         // Southwest coordinates
-    //     [40.85, -73.80]          // Northeast coordinates
-    // ],
     maxBoundsViscosity: 1.0      // Prevents the user from dragging outside the bounds
+});
+
+// Save map position on every move/zoom
+map.on('moveend', function() {
+    const c = map.getCenter();
+    localStorage.setItem('emberMapView', JSON.stringify({ lat: c.lat, lng: c.lng, zoom: map.getZoom() }));
 });
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
