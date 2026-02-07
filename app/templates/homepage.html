@@ -88,7 +88,7 @@
                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
-                    <input type="text" placeholder="Search tools, kitchenware..." class="flex-1 outline-none text-gray-600 placeholder-gray-400">
+                    <input id="searchInput" type="text" placeholder="Search tools, kitchenware..." class="flex-1 outline-none text-gray-600 placeholder-gray-400">
                     <button class="bg-gray-100 rounded-full p-2.5 flex items-center gap-2 cursor-pointer hover:bg-gray-200">
                         <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <line x1="4" y1="6" x2="20" y2="6" stroke-width="2" stroke-linecap="round"/>
@@ -162,18 +162,7 @@
         <!-- Sidebar Section -->
         <div class="px-4 pt-4 max-w-[460px] h-[calc(100vh-8.5rem)] pointer-events-auto">
             <div id="sidebar" class="bg-white/95 backdrop-blur rounded-3xl shadow-xl p-6 h-full overflow-y-auto">
-                <!-- Default: Nearby Items -->
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-2">
-                        <div class="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
-                            <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                            </svg>
-                        </div>
-                        <h2 class="text-xl font-semibold text-gray-800">Nearby Items</h2>
-                    </div>
-                </div>
-                <p class="text-gray-500 text-sm">Click a marker on the map to see items at that location.</p>
+                <!-- Populated dynamically by showNearbyItems() -->
             </div>
         </div>
 
@@ -196,18 +185,77 @@
             }
         });
 
-        // Sidebar: default content stored for restoring
-        const _sidebarDefault = document.getElementById('sidebar').innerHTML;
+        // Track whether we're viewing a specific location
+        let _viewingLocation = false;
+        let _currentLocation = null; // store loc object when viewing a pin
+
+        function _getSearchQuery() {
+            var input = document.getElementById('searchInput');
+            return input ? input.value.toLowerCase() : '';
+        }
+
+        function _itemMatchesSearch(item, query) {
+            if (!query) return true;
+            var name = (item.name || '').toLowerCase();
+            var category = (item.category || '').toLowerCase();
+            var description = (item.description || '').toLowerCase();
+            return name.indexOf(query) !== -1 || category.indexOf(query) !== -1 || description.indexOf(query) !== -1;
+        }
+
+        function _escHtml(s) {
+            return (s || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function _distanceMiles(lat1, lng1, lat2, lng2) {
+            const R = 3958.8; // Earth radius in miles
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLng/2) * Math.sin(dLng/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        }
+
+        function _renderItemCard(item, distanceText) {
+            const itemName = _escHtml(item.name);
+            const itemCategory = _escHtml(item.category);
+            const imgSrc = item.picture ? '/static/uploads/' + item.picture : '';
+            let html = '<div class="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 hover:shadow-lg transition-shadow">';
+            html += '<div class="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">';
+            if (imgSrc) {
+                html += '<img src="' + imgSrc + '" alt="' + itemName + '" class="w-full h-full object-cover">';
+            } else {
+                html += '<svg class="w-10 h-10 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/></svg>';
+            }
+            html += '</div>';
+            html += '<div class="flex-1 min-w-0">';
+            html += '<h3 class="font-semibold text-gray-800 mb-1 truncate">' + itemName + '</h3>';
+            if (itemCategory) {
+                html += '<span class="inline-block text-xs bg-orange-100 text-orange-600 rounded-full px-2 py-0.5">' + itemCategory + '</span>';
+            }
+            if (distanceText) {
+                html += '<div class="flex items-center gap-1 text-sm text-orange-500 mt-1">';
+                html += '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>';
+                html += '<span>' + distanceText + '</span>';
+                html += '</div>';
+            }
+            html += '<div class="flex gap-2 mt-3">';
+            html += '<button class="flex-1 px-4 py-1.5 text-sm bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600">Borrow</button>';
+            html += '</div>';
+            html += '</div>';
+            html += '</div>';
+            return html;
+        }
 
         function showLocationItems(loc) {
+            _viewingLocation = true;
+            _currentLocation = loc;
+            var query = _getSearchQuery();
             const sidebar = document.getElementById('sidebar');
-            const locationName = loc.location_name || loc.name || 'Unknown Location';
-            const escName = locationName.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            const escAddr = (loc.address || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const escName = _escHtml(loc.location_name || loc.name || 'Unknown Location');
+            const escAddr = _escHtml(loc.address);
 
             let html = '';
-
-            // Header with back button
             html += '<div class="flex items-center gap-3 mb-2">';
             html += '<button onclick="showNearbyItems()" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center flex-shrink-0">';
             html += '<svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>';
@@ -219,33 +267,14 @@
             html += '</div>';
             html += '<hr class="my-4 border-gray-200">';
 
-            if (!loc.items || loc.items.length === 0) {
-                html += '<p class="text-gray-500 text-sm">No items at this location yet.</p>';
+            var items = (loc.items || []).filter(function(item) { return _itemMatchesSearch(item, query); });
+
+            if (items.length === 0) {
+                html += '<p class="text-gray-500 text-sm">' + (query ? 'No matching items.' : 'No items at this location yet.') + '</p>';
             } else {
                 html += '<div class="space-y-4">';
-                loc.items.forEach(function(item) {
-                    const itemName = (item.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                    const itemCategory = (item.category || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-                    const imgSrc = item.picture ? '/static/uploads/' + item.picture : '';
-
-                    html += '<div class="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 hover:shadow-lg transition-shadow">';
-                    html += '<div class="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">';
-                    if (imgSrc) {
-                        html += '<img src="' + imgSrc + '" alt="' + itemName + '" class="w-full h-full object-cover">';
-                    } else {
-                        html += '<svg class="w-10 h-10 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/></svg>';
-                    }
-                    html += '</div>';
-                    html += '<div class="flex-1 min-w-0">';
-                    html += '<h3 class="font-semibold text-gray-800 mb-1 truncate">' + itemName + '</h3>';
-                    if (itemCategory) {
-                        html += '<span class="inline-block text-xs bg-orange-100 text-orange-600 rounded-full px-2 py-0.5">' + itemCategory + '</span>';
-                    }
-                    html += '<div class="flex gap-2 mt-3">';
-                    html += '<button class="flex-1 px-4 py-1.5 text-sm bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600">Borrow</button>';
-                    html += '</div>';
-                    html += '</div>';
-                    html += '</div>';
+                items.forEach(function(item) {
+                    html += _renderItemCard(item, null);
                 });
                 html += '</div>';
             }
@@ -254,8 +283,65 @@
         }
 
         function showNearbyItems() {
-            document.getElementById('sidebar').innerHTML = _sidebarDefault;
+            _viewingLocation = false;
+            _currentLocation = null;
+            var query = _getSearchQuery();
+            const sidebar = document.getElementById('sidebar');
+
+            // Header
+            let html = '<div class="flex items-center justify-between mb-6">';
+            html += '<div class="flex items-center gap-2">';
+            html += '<div class="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">';
+            html += '<svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/></svg>';
+            html += '</div>';
+            html += '<h2 class="text-xl font-semibold text-gray-800">Nearby Items</h2>';
+            html += '</div></div>';
+
+            // Items from map.js global allItems
+            if (typeof allItems === 'undefined' || allItems.length === 0) {
+                html += '<p class="text-gray-500 text-sm">No items found nearby.</p>';
+                sidebar.innerHTML = html;
+                return;
+            }
+
+            // Sort by distance from user (or map center as fallback)
+            var refLat = (typeof userLat !== 'undefined' && userLat !== null) ? userLat : map.getCenter().lat;
+            var refLng = (typeof userLng !== 'undefined' && userLng !== null) ? userLng : map.getCenter().lng;
+
+            var sorted = allItems.slice()
+                .filter(function(item) { return _itemMatchesSearch(item, query); })
+                .sort(function(a, b) {
+                    var dA = _distanceMiles(refLat, refLng, a.latitude, a.longitude);
+                    var dB = _distanceMiles(refLat, refLng, b.latitude, b.longitude);
+                    return dA - dB;
+                });
+
+            if (sorted.length === 0) {
+                html += '<p class="text-gray-500 text-sm">No matching items found.</p>';
+            } else {
+                html += '<div class="space-y-4">';
+                sorted.forEach(function(item) {
+                    var dist = _distanceMiles(refLat, refLng, item.latitude, item.longitude);
+                    var distText = dist < 0.1 ? 'Nearby' : dist.toFixed(1) + ' mi away';
+                    html += _renderItemCard(item, distText);
+                });
+                html += '</div>';
+            }
+
+            sidebar.innerHTML = html;
         }
+
+        // Render initial sidebar state
+        showNearbyItems();
+
+        // Search filtering — re-render current view on each keystroke
+        document.getElementById('searchInput').addEventListener('input', function() {
+            if (_viewingLocation && _currentLocation) {
+                showLocationItems(_currentLocation);
+            } else {
+                showNearbyItems();
+            }
+        });
     </script>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
