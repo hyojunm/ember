@@ -165,19 +165,27 @@ def serve_upload(filename):
 
     # return response
 
+# @app.route('/static/maps/<path:filename>')
+# def serve_pmtiles(filename):
+#     range_header = request.headers.get('Range', None)
+#     file_path = os.path.join(app.root_path, 'static', 'maps', filename)
+#     file_size = os.path.getsize(file_path)
+#     if range_header:
+#         byte_range = range_header.replace('bytes=', '').split('-')
+#         start = int (byte_range[0])
+#         end = int (byte_range[1]) if byte_range[1] else file_size - 1
+#         print(end - start + 1)
+#     else:
+#         print(file_size)
+#     return send_from_directory(os.path.join(app.root_path, 'static', 'maps'), filename, conditional=True)
+
 @app.route('/static/maps/<path:filename>')
 def serve_pmtiles(filename):
-    range_header = request.headers.get('Range', None)
-    file_path = os.path.join(app.root_path, 'static', 'maps', filename)
-    file_size = os.path.getsize(file_path)
-    if range_header:
-        byte_range = range_header.replace('bytes=', '').split('-')
-        start = int (byte_range[0])
-        end = int (byte_range[1]) if byte_range[1] else file_size - 1
-        print(end - start + 1)
-    else:
-        print(file_size)
-    return send_from_directory(os.path.join(app.root_path, 'static', 'maps'), filename, conditional=True)
+    # This URL is the one you copied from the Vercel Dashboard
+    blob_url = "https://ypuczzdtz97dm7t1.public.blob.vercel-storage.com/pittsburgh-pa.pmtiles"
+
+    # This tells the browser: "The file isn't here, go get it from Vercel Blob"
+    return redirect(blob_url)
 
 
 if __name__ == '__main__':
