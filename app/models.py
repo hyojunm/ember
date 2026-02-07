@@ -16,7 +16,7 @@ class User(UserMixin, db.Model):
     phone_public = db.Column(db.Boolean, default=False)
     
     # Relationship: One user can share many items
-    items = db.relationship('Item', backref='owner', lazy=True)
+    items = db.relationship('Item', backref='owner', lazy=True, cascade='all, delete-orphan')
     
     # Relationship: One user can have many saved locations
     saved_locations = db.relationship('SavedLocation', backref='user', lazy=True, cascade='all, delete-orphan')
