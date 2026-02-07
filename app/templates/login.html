@@ -8,12 +8,12 @@
     <form method="POST">
         <div class="form-group">
             <label>Username</label>
-            <input type="text" name="username" class="form-control" required>
+            <input type="text" name="username" class="input-field" required>
         </div>
 
         <div class="form-group">
             <label>Password</label>
-            <input type="password" name="password" class="form-control" required>
+            <input type="password" name="password" class="input-field" required>
         </div>
         
         <div style="margin-bottom: 15px;">
@@ -21,9 +21,9 @@
             <label for="remember">Remember me</label>
         </div>
         
-        <button type="submit" class="btn btn-pgh">Login</button>
+        <button type="submit" class="btn-main">Login</button>
     </form>
 
-    <p>Don't have an account? <a href="{{ url_for('register') }}">Register here</a></p>
+    <p>Don't have an account? <a href="{{ url_for('users.register') }}">Register here</a></p>
 </div>
 {% endblock %}

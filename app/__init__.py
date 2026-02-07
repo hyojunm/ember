@@ -1,7 +1,6 @@
 from .extensions import db, login_manager
 from flask import Flask
-from flask import jsonify, flash, redirect, render_template, request, send_from_directory, url_for
-from flask_login import current_user, login_user, logout_user
+from flask import jsonify, render_template, send_from_directory
 from .models import Item, User
 from sqlalchemy.orm import joinedload
 import os
@@ -23,67 +22,16 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 
+# Register blueprints
+from .routes import users, health, items
+app.register_blueprint(users.bp)
+app.register_blueprint(health.bp)
+app.register_blueprint(items.bp)
+
+
 @app.route('/')
 def main():
     return render_template('main.html')
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('main'))
-
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        remember = True if request.form.get('remember') else False
-        
-        if User.query.filter_by(username=username).first():
-            flash('Username already exists.', 'danger')
-        else:
-            new_user = User(username=username)
-            new_user.set_password(password)
-
-            db.session.add(new_user)
-            db.session.commit()
-            
-            login_user(new_user, remember=remember)
-            return redirect(url_for('main'))
-
-    return render_template('register.html')
-
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('main'))
-
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        remember = True if request.form.get('remember') else False
-
-        user = User.query.filter_by(username=username).first()
-
-        if user and user.check_password(password):
-            login_user(user, remember=remember)
-            flash(f'Welcome back, {username}!', 'success')
-            
-            # if the user was redirected here from a protected page, 
-            # take them back there, otherwise go to main.
-            next_page = request.args.get('next')
-
-            return redirect(next_page) if next_page else redirect(url_for('main'))
-        else:
-            flash('Incorrect username or password.', 'danger')
-
-    return render_template('login.html')
-
-
-@app.route('/logout')
-def logout():
-    logout_user()
-    return redirect(url_for('login'))
 
 
 @app.route('/api/items', methods=['GET'])
