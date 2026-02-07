@@ -1,8 +1,9 @@
 from .extensions import db, login_manager
 from flask import Flask
-from flask import flash, redirect, render_template, request, send_from_directory, url_for
+from flask import jsonify, flash, redirect, render_template, request, send_from_directory, url_for
 from flask_login import current_user, login_user, logout_user
-from .models import User
+from .models import Item, User
+from sqlalchemy.orm import joinedload
 import os
 
 
@@ -82,7 +83,19 @@ def login():
 @app.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('main'))
+    return redirect(url_for('login'))
+
+
+@app.route('/api/items', methods=['GET'])
+def get_items():
+    # Load items and 'eagerly' join their related location and category
+    items = Item.query.options(
+        joinedload(Item.location),
+        joinedload(Item.category),
+        joinedload(Item.owner)
+    ).filter_by(is_available=True).all()
+    
+    return jsonify([item.to_dict() for item in items])
 
 
 # serve pwa files from root
