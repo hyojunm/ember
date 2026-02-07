@@ -187,6 +187,15 @@
         let _viewingLocation = false;
         let _currentLocation = null; // store loc object when viewing a pin
 
+        // Center map on item location
+        function centerMapOnItem(latitude, longitude) {
+            if (typeof map !== 'undefined') {
+                map.flyTo([latitude, longitude], 16, {
+                    duration: 1.0
+                });
+            }
+        }
+
         function _getCategoryIconSVG(iconType) {
             const icons = {
                 'icon-tools': '<svg class="w-12 h-12 text-orange-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633zM5.707 6.293a1 1 0 010 1.414L3.414 10l2.293 2.293a1 1 0 11-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0zm8.586 0a1 1 0 011.414 0l3 3a1 1 0 010 1.414l-3 3a1 1 0 11-1.414-1.414L16.586 10l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>',
@@ -232,7 +241,7 @@
             const imgSrc = item.picture ? '/static/uploads/' + item.picture : '';
             const isIconPlaceholder = item.picture && item.picture.startsWith('icon-');
             
-            let html = '<div class="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 hover:shadow-lg transition-shadow">';
+            let html = '<div class="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 hover:shadow-lg transition-shadow cursor-pointer" onclick="centerMapOnItem(' + item.latitude + ', ' + item.longitude + ')">';
             html += '<div class="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">';
             if (imgSrc && !isIconPlaceholder) {
                 html += '<img src="' + imgSrc + '" alt="' + itemName + '" class="w-full h-full object-cover">';
@@ -252,7 +261,7 @@
                 html += '</div>';
             }
             html += '<div class="flex gap-2 mt-3">';
-            html += '<button class="flex-1 px-4 py-1.5 text-sm bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600">Borrow</button>';
+            html += '<button onclick="event.stopPropagation(); centerMapOnItem(' + item.latitude + ', ' + item.longitude + ')" class="flex-1 px-4 py-1.5 text-sm bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600">Borrow</button>';
             html += '</div>';
             html += '</div>';
             html += '</div>';
