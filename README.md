@@ -5,10 +5,12 @@ natural disaster relief.
 
 ## Build & Run
 
+*To download the map file, you need to have Git LFS installed.*
+
 Navigate to your desired directory, then clone the repository:
 
 ```bash
-git clone
+git clone https://github.com/hyojunm/ember.git
 ```
 
 Set up a virtual environment and install dependencies:
@@ -48,7 +50,7 @@ Complete by: **Friday, 10:00pm**
 
 - [x] Create git repository
 - [x] Set up Flask app structure
-- [ ] Finalize and implement database schema
+- [x] Finalize and implement database schema
 - [ ] Integrate front end UI into app and ensure every button
       directs to the correct page
     - Main page (map and listings)
@@ -56,9 +58,9 @@ Complete by: **Friday, 10:00pm**
     - Profile settings page
     - My items page
     - Update item page
-- [ ] Implement register and login features, store info in
+- [x] Implement register and login features, store info in
       database
-- [ ] Center the map based on the user's current location and
+- [x] Center the map based on the user's current location and
       set a max zoom out (limit view to local area)
 
 ### Checkpoint 2
@@ -78,7 +80,7 @@ Complete by: **Saturday, 10:00am**
 - [ ] Implement delete item feature
 - [ ] Ensure the user interface is compatible with smaller screen
       sizes
-- [ ] **(Priority)** Place pins on the map corresponding to listed
+- [x] **(Priority)** Place pins on the map corresponding to listed
       items
 
 ### Checkpoint 3
