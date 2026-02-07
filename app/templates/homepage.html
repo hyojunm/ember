@@ -68,6 +68,90 @@
         </div>
     </div>
 
+    <!-- Filter Modal -->
+    <div id="filterModal" class="hidden fixed inset-0 z-[1001] flex items-center justify-center">
+        <div class="absolute inset-0 bg-black bg-opacity-50" id="filterModalBackdrop"></div>
+        <div class="bg-white/95 backdrop-blur rounded-3xl shadow-xl w-full max-w-md p-6 relative z-10">
+            <button id="filterModalClose" class="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            <h2 class="text-xl font-semibold text-gray-800 mb-6">Filter Items</h2>
+            
+            <!-- Category Filter -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-3">Category</label>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="category-filter w-4 h-4 text-orange-500 rounded" value="all" checked>
+                        <span class="text-gray-700">All Categories</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="category-filter w-4 h-4 text-orange-500 rounded" value="Tools & Equipment">
+                        <span class="text-gray-700">Tools & Equipment</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="category-filter w-4 h-4 text-orange-500 rounded" value="Kitchen & Appliances">
+                        <span class="text-gray-700">Kitchen & Appliances</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="category-filter w-4 h-4 text-orange-500 rounded" value="Garden & Outdoor">
+                        <span class="text-gray-700">Garden & Outdoor</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="category-filter w-4 h-4 text-orange-500 rounded" value="Electronics">
+                        <span class="text-gray-700">Electronics</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="category-filter w-4 h-4 text-orange-500 rounded" value="Sports & Recreation">
+                        <span class="text-gray-700">Sports & Recreation</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="category-filter w-4 h-4 text-orange-500 rounded" value="Other">
+                        <span class="text-gray-700">Other</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Radius Filter -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-3">Distance Radius</label>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="radius" class="radius-filter w-4 h-4 text-orange-500" value="1" checked>
+                        <span class="text-gray-700">Within 1 mile</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="radius" class="radius-filter w-4 h-4 text-orange-500" value="3">
+                        <span class="text-gray-700">Within 3 miles</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="radius" class="radius-filter w-4 h-4 text-orange-500" value="5">
+                        <span class="text-gray-700">Within 5 miles</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="radius" class="radius-filter w-4 h-4 text-orange-500" value="10">
+                        <span class="text-gray-700">Within 10 miles</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="radius" class="radius-filter w-4 h-4 text-orange-500" value="999999">
+                        <span class="text-gray-700">Any distance</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button id="clearFilters" class="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition-colors">
+                    Clear All
+                </button>
+                <button id="applyFilters" class="flex-1 py-3 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 transition-colors">
+                    Apply Filters
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Main Content -->
     <div class="relative min-h-screen pointer-events-none">
         <!-- Top Navigation Bar -->
@@ -87,7 +171,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                     <input id="searchInput" type="text" placeholder="Search tools, kitchenware..." class="flex-1 outline-none text-gray-600 placeholder-gray-400">
-                    <button class="bg-gray-100 rounded-full p-2.5 flex items-center gap-2 cursor-pointer hover:bg-gray-200">
+                    <button id="filterBtn" class="bg-gray-100 rounded-full p-2.5 flex items-center gap-2 cursor-pointer hover:bg-gray-200">
                         <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <line x1="4" y1="6" x2="20" y2="6" stroke-width="2" stroke-linecap="round"/>
                             <line x1="4" y1="12" x2="20" y2="12" stroke-width="2" stroke-linecap="round"/>
@@ -172,6 +256,79 @@
         </div>
     </div>
     <script>
+        // Filter state
+        let selectedCategories = ['all'];
+        let selectedRadius = 1;
+
+        // Filter Modal
+        const filterModal = document.getElementById('filterModal');
+        const filterBtn = document.getElementById('filterBtn');
+        const filterModalClose = document.getElementById('filterModalClose');
+        const filterModalBackdrop = document.getElementById('filterModalBackdrop');
+        const clearFiltersBtn = document.getElementById('clearFilters');
+        const applyFiltersBtn = document.getElementById('applyFilters');
+
+        filterBtn.addEventListener('click', function() {
+            filterModal.classList.remove('hidden');
+        });
+
+        filterModalClose.addEventListener('click', function() {
+            filterModal.classList.add('hidden');
+        });
+
+        filterModalBackdrop.addEventListener('click', function() {
+            filterModal.classList.add('hidden');
+        });
+
+        // Category filter logic
+        const categoryFilters = document.querySelectorAll('.category-filter');
+        const allCategoryCheckbox = document.querySelector('.category-filter[value="all"]');
+
+        categoryFilters.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                if (this.value === 'all' && this.checked) {
+                    // If "All" is checked, uncheck others
+                    categoryFilters.forEach(cb => {
+                        if (cb.value !== 'all') cb.checked = false;
+                    });
+                } else if (this.value !== 'all' && this.checked) {
+                    // If any specific category is checked, uncheck "All"
+                    allCategoryCheckbox.checked = false;
+                }
+                
+                // If no categories are checked, check "All"
+                const anyChecked = Array.from(categoryFilters).some(cb => cb.checked);
+                if (!anyChecked) {
+                    allCategoryCheckbox.checked = true;
+                }
+            });
+        });
+
+        // Clear filters
+        clearFiltersBtn.addEventListener('click', function() {
+            categoryFilters.forEach(cb => {
+                cb.checked = cb.value === 'all';
+            });
+            document.querySelector('.radius-filter[value="1"]').checked = true;
+        });
+
+        // Apply filters
+        applyFiltersBtn.addEventListener('click', function() {
+            // Get selected categories
+            selectedCategories = Array.from(categoryFilters)
+                .filter(cb => cb.checked)
+                .map(cb => cb.value);
+            
+            // Get selected radius
+            selectedRadius = parseFloat(document.querySelector('.radius-filter:checked').value);
+            
+            filterModal.classList.add('hidden');
+            
+            // Refresh the nearby items list
+            showNearbyItems();
+        });
+
+        // Profile dropdown
         document.getElementById('profileBtn').addEventListener('click', function(e) {
             e.stopPropagation();
             document.getElementById('profileDropdown').classList.toggle('hidden');
@@ -186,6 +343,15 @@
         // Track whether we're viewing a specific location
         let _viewingLocation = false;
         let _currentLocation = null; // store loc object when viewing a pin
+
+        // Center map on item location
+        function centerMapOnItem(latitude, longitude) {
+            if (typeof map !== 'undefined') {
+                map.flyTo([latitude, longitude], 16, {
+                    duration: 1.0
+                });
+            }
+        }
 
         function _getCategoryIconSVG(iconType) {
             const icons = {
@@ -232,7 +398,7 @@
             const imgSrc = item.picture ? '/static/uploads/' + item.picture : '';
             const isIconPlaceholder = item.picture && item.picture.startsWith('icon-');
             
-            let html = '<div class="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 hover:shadow-lg transition-shadow">';
+            let html = '<div class="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 hover:shadow-lg transition-shadow cursor-pointer" onclick="centerMapOnItem(' + item.latitude + ', ' + item.longitude + ')">';
             html += '<div class="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">';
             if (imgSrc && !isIconPlaceholder) {
                 html += '<img src="' + imgSrc + '" alt="' + itemName + '" class="w-full h-full object-cover">';
@@ -252,7 +418,7 @@
                 html += '</div>';
             }
             html += '<div class="flex gap-2 mt-3">';
-            html += '<button class="flex-1 px-4 py-1.5 text-sm bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600">Borrow</button>';
+            html += '<button onclick="event.stopPropagation(); centerMapOnItem(' + item.latitude + ', ' + item.longitude + ')" class="flex-1 px-4 py-1.5 text-sm bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600">Borrow</button>';
             html += '</div>';
             html += '</div>';
             html += '</div>';
@@ -279,7 +445,17 @@
             html += '</div>';
             html += '<hr class="my-4 border-gray-200">';
 
-            var items = (loc.items || []).filter(function(item) { return _itemMatchesSearch(item, query); });
+            var items = (loc.items || []).filter(function(item) {
+                // Search query filter
+                if (!_itemMatchesSearch(item, query)) return false;
+                
+                // Category filter
+                if (!selectedCategories.includes('all')) {
+                    if (!selectedCategories.includes(item.category)) return false;
+                }
+                
+                return true;
+            });
 
             if (items.length === 0) {
                 html += '<p class="text-gray-500 text-sm">' + (query ? 'No matching items.' : 'No items at this location yet.') + '</p>';
@@ -321,7 +497,21 @@
             var refLng = (typeof userLng !== 'undefined' && userLng !== null) ? userLng : map.getCenter().lng;
 
             var sorted = allItems.slice()
-                .filter(function(item) { return _itemMatchesSearch(item, query); })
+                .filter(function(item) {
+                    // Search query filter
+                    if (!_itemMatchesSearch(item, query)) return false;
+                    
+                    // Category filter
+                    if (!selectedCategories.includes('all')) {
+                        if (!selectedCategories.includes(item.category)) return false;
+                    }
+                    
+                    // Radius filter
+                    var dist = _distanceMiles(refLat, refLng, item.latitude, item.longitude);
+                    if (dist > selectedRadius) return false;
+                    
+                    return true;
+                })
                 .sort(function(a, b) {
                     var dA = _distanceMiles(refLat, refLng, a.latitude, a.longitude);
                     var dB = _distanceMiles(refLat, refLng, b.latitude, b.longitude);
