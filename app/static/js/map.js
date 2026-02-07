@@ -30,8 +30,13 @@ const userIcon = L.divIcon({
 });
 
 let userMarker = null;
+let userLat = null;
+let userLng = null;
+let allItems = [];
 
 function setUserLocation(lat, lng) {
+    userLat = lat;
+    userLng = lng;
     const coords = [lat, lng];
     map.setView(coords, Math.max(map.getZoom(), 15));
 
@@ -40,6 +45,9 @@ function setUserLocation(lat, lng) {
     } else {
         userMarker.setLatLng(coords);
     }
+
+    // Refresh nearby items sidebar if not viewing a specific location
+    if (typeof _viewingLocation !== 'undefined' && !_viewingLocation && typeof showNearbyItems === 'function') showNearbyItems();
 }
 
 function requestUserLocation() {
@@ -68,6 +76,7 @@ async function loadMapItems() {
     try {
         const response = await fetch('/api/items');
         const items = await response.json();
+        allItems = items;
 
         // Group items by location coordinates
         const locations = {};
@@ -108,6 +117,8 @@ async function loadMapItems() {
                 });
             }
         });
+        // Populate sidebar with nearby items (only if not viewing a specific location)
+        if (typeof _viewingLocation !== 'undefined' && !_viewingLocation && typeof showNearbyItems === 'function') showNearbyItems();
     } catch (err) {
         console.log("Map loading offline mode - showing cached data");
     }
