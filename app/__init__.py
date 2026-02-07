@@ -108,13 +108,25 @@ def serve_upload(filename):
 
 @app.route('/static/maps/<path:filename>')
 def serve_pmtiles(filename):
-    # 'conditional=True' tells Flask to support HTTP Range Requests
+    path = os.path.join(app.root_path, 'static/maps', filename)
+    size = os.path.getsize(path)
+    
     response = send_from_directory(os.path.join(app.root_path, 'static/maps'), filename, conditional=True)
+    
+    # Force these headers to satisfy Mac/Unix byte-serving
     response.headers['Cache-Control'] = 'public, max-age=31536000'
+    response.headers['Content-Length'] = size
     response.headers['Accept-Ranges'] = 'bytes'
     response.headers['Content-Type'] = 'application/octet-stream'
-
+    
     return response
+    # 'conditional=True' tells Flask to support HTTP Range Requests
+    # response = send_from_directory(os.path.join(app.root_path, 'static/maps'), filename, conditional=True)
+    # response.headers['Cache-Control'] = 'public, max-age=31536000'
+    # response.headers['Accept-Ranges'] = 'bytes'
+    # response.headers['Content-Type'] = 'application/octet-stream'
+
+    # return response
 
 
 if __name__ == '__main__':

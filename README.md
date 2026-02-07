@@ -24,7 +24,7 @@ python3 -m pip install -r requirements.txt
 Initialize the sqlite database file (if needed):
 
 ```bash
-python3 -m app.init_db
+python3 -m app.util.init_db
 ```
 
 Run the app:
