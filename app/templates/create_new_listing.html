@@ -286,9 +286,9 @@
         async function loadSavedLocations() {
             try {
                 const response = await fetch('/api/saved-locations');
+                const select = document.getElementById('locationSelect');
                 if (response.ok) {
                     savedLocations = await response.json();
-                    const select = document.getElementById('locationSelect');
                     select.innerHTML = '<option value="">Select a saved location</option>';
                     savedLocations.forEach(loc => {
                         const option = document.createElement('option');
@@ -297,10 +297,13 @@
                         select.appendChild(option);
                     });
                 } else {
-                    // If not authenticated or error, show message
-                    const select = document.getElementById('locationSelect');
                     select.innerHTML = '<option value="">No saved locations</option>';
                 }
+                // Always add the "new location" option at the end
+                const newOpt = document.createElement('option');
+                newOpt.value = '__new__';
+                newOpt.textContent = '+ Add new location';
+                select.appendChild(newOpt);
             } catch (error) {
                 console.error('Error loading locations:', error);
             }
@@ -308,9 +311,22 @@
 
         // Handle location selection
         document.getElementById('locationSelect').addEventListener('change', function(e) {
-            const locationId = e.target.value;
-            if (locationId) {
-                const location = savedLocations.find(loc => loc.id == locationId);
+            const val = e.target.value;
+            if (val === '__new__') {
+                // Save current form state to sessionStorage
+                const formState = {
+                    item_name: document.querySelector('[name="item_name"]').value,
+                    category: document.getElementById('categorySelect').value,
+                    is_borrow: document.getElementById('isBorrow').value,
+                    quantity: document.querySelector('[name="quantity"]').value,
+                    is_available: document.getElementById('isAvailable').value,
+                    item_desc: document.querySelector('[name="item_desc"]').value,
+                    pickup_instructions: document.querySelector('[name="pickup_instructions"]').value
+                };
+                sessionStorage.setItem('createListingFormState', JSON.stringify(formState));
+                window.location.href = '/?from=create-listing';
+            } else if (val) {
+                const location = savedLocations.find(loc => loc.id == val);
                 if (location) {
                     document.getElementById('locationName').value = location.name;
                     document.getElementById('locationAddress').value = location.address;
@@ -442,8 +458,64 @@
             }
         }
 
-        // Load locations and items on page load
-        loadSavedLocations();
+        // Restore form state from sessionStorage (after redirect back from homepage)
+        function restoreFormState() {
+            const saved = sessionStorage.getItem('createListingFormState');
+            const newLocId = sessionStorage.getItem('newLocationId');
+
+            if (saved) {
+                const s = JSON.parse(saved);
+                if (s.item_name) document.querySelector('[name="item_name"]').value = s.item_name;
+                if (s.category) document.getElementById('categorySelect').value = s.category;
+                if (s.quantity) document.querySelector('[name="quantity"]').value = s.quantity;
+                if (s.item_desc) document.querySelector('[name="item_desc"]').value = s.item_desc;
+                if (s.pickup_instructions) document.querySelector('[name="pickup_instructions"]').value = s.pickup_instructions;
+
+                // Restore listing type toggle
+                if (s.is_borrow !== undefined) {
+                    document.getElementById('isBorrow').value = s.is_borrow;
+                    var activeType = s.is_borrow === 'true' ? 'borrow' : 'donate';
+                    document.querySelectorAll('.listing-type-btn').forEach(function(btn) {
+                        if (btn.dataset.type === activeType) {
+                            btn.classList.add('bg-white', 'border-gray-800', 'text-gray-800');
+                            btn.classList.remove('bg-gray-50', 'border-gray-200', 'text-gray-500');
+                        } else {
+                            btn.classList.remove('bg-white', 'border-gray-800', 'text-gray-800');
+                            btn.classList.add('bg-gray-50', 'border-gray-200', 'text-gray-500');
+                        }
+                    });
+                }
+
+                // Restore availability toggle
+                if (s.is_available === 'false') {
+                    document.getElementById('isAvailable').value = 'false';
+                    var toggle = document.getElementById('availabilityToggle');
+                    toggle.classList.remove('bg-orange-500');
+                    toggle.classList.add('bg-gray-300');
+                    toggle.querySelector('span').classList.remove('translate-x-8');
+                    toggle.querySelector('span').classList.add('translate-x-1');
+                }
+
+                sessionStorage.removeItem('createListingFormState');
+            }
+
+            // Select the newly created location in the dropdown
+            if (newLocId) {
+                var select = document.getElementById('locationSelect');
+                select.value = newLocId;
+                var loc = savedLocations.find(function(l) { return l.id == newLocId; });
+                if (loc) {
+                    document.getElementById('locationName').value = loc.name;
+                    document.getElementById('locationAddress').value = loc.address;
+                    document.getElementById('locationLatitude').value = loc.latitude;
+                    document.getElementById('locationLongitude').value = loc.longitude;
+                }
+                sessionStorage.removeItem('newLocationId');
+            }
+        }
+
+        // Load locations first (need them before restoring), then restore state
+        loadSavedLocations().then(restoreFormState);
         loadMyItems();
     </script>
 </body>

@@ -618,6 +618,10 @@
             form.reset();
         }
 
+        // Check if redirected from create-listing for pin-drop
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromCreateListing = urlParams.get('from') === 'create-listing';
+
         addBtn.addEventListener('click', function() {
             {% if current_user.is_authenticated %}
             enterSelectionMode();
@@ -625,6 +629,13 @@
             window.location.href = '/login';
             {% endif %}
         });
+
+        // Auto-enter pin-drop mode if redirected from create-listing
+        if (fromCreateListing) {
+            {% if current_user.is_authenticated %}
+            enterSelectionMode();
+            {% endif %}
+        }
 
         // Track mouse for crosshair lines
         catcher.addEventListener('mousemove', function(e) {
@@ -675,6 +686,13 @@
             .then((savedLocation) => {
                 closeModal();
 
+                // If we came from create-listing, save new location ID and go back
+                if (fromCreateListing && savedLocation && savedLocation.id) {
+                    sessionStorage.setItem('newLocationId', savedLocation.id);
+                    window.location.href = '/create-listing';
+                    return;
+                }
+
                 // Add a grayed campfire marker on the map for visual feedback
                 const newMarker = L.marker([data.latitude, data.longitude], { icon: campfireEmptyIcon }).addTo(map);
                 const key = data.latitude + ',' + data.longitude;
@@ -685,7 +703,7 @@
                         showLocationItems({ location_name: data.name || data.address, address: data.address, items: [] });
                     }
                 });
-                
+
                 console.log('Saved location:', savedLocation);
             })
             .catch(err => {
