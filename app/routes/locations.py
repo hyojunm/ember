@@ -19,6 +19,7 @@ def get_locations():
 
 
 @bp.route('/api/locations', methods=['POST'])
+@login_required
 def create_location():
     data = request.get_json()
 

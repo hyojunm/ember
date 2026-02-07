@@ -1,6 +1,7 @@
 from .extensions import db, login_manager
 from flask import Flask
-from flask import jsonify, render_template, send_from_directory
+from flask import jsonify, render_template, send_from_directory, redirect, url_for
+from flask_login import current_user
 from .models import Item, User
 from sqlalchemy.orm import joinedload
 import os
@@ -45,6 +46,8 @@ def main():
 
 @app.route('/create-listing')
 def create_listing():
+    if not current_user.is_authenticated:
+        return redirect(url_for("users.login"))
     return render_template('create_new_listing.html')
 
 @app.route('/edit-listing')
