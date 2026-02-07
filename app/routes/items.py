@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from ..extensions import db
 from ..models import Item, Category, Location
+from .search import embed_item
 from sqlalchemy.orm import joinedload
 import os
 
@@ -137,6 +138,11 @@ def create_item():
         )
         
         db.session.add(new_item)
+        db.session.flush()  # Ensure relationships are loaded for embedding
+
+        # Compute Dedalus embedding (non-blocking — silently skipped if unavailable)
+        embed_item(new_item)
+
         db.session.commit()
         
         return jsonify({
@@ -237,7 +243,10 @@ def update_item(item_id):
                     os.makedirs(upload_folder, exist_ok=True)
                     file.save(os.path.join(upload_folder, picture_filename))
                     item.picture = picture_filename
-        
+
+        # Re-compute Dedalus embedding if text fields changed
+        embed_item(item)
+
         db.session.commit()
         
         return jsonify({

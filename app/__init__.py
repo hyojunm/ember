@@ -3,8 +3,11 @@ from flask import Flask
 from flask import jsonify, make_response, render_template, send_from_directory, redirect, request, url_for
 from flask_login import current_user
 from .models import Item, User
+from dotenv import load_dotenv
 import os
 import mimetypes
+
+load_dotenv()  # Load .env before anything reads DEDALUS_API_KEY
 
 app = Flask(__name__)
 base_dir = os.path.abspath(os.path.dirname(__file__))
@@ -42,12 +45,13 @@ def load_user(user_id):
 
 
 # --- REGISTER BLUEPRINTS ---
-from .routes import users, health, items, locations
+from .routes import users, health, items, locations, search
 
 app.register_blueprint(users.bp)
 app.register_blueprint(health.bp)
 app.register_blueprint(items.bp)
 app.register_blueprint(locations.bp)
+app.register_blueprint(search.bp)
 
 
 # --- ROUTES ---

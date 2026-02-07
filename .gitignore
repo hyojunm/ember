@@ -1,6 +1,9 @@
 *env/
 *__pycache__/
 
+# Environment secrets
+.env
+
 # Database files
 *.db
 site.db

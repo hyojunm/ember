@@ -90,6 +90,9 @@ class Item(db.Model):
     # picture
     picture = db.Column(db.String(100)) # Path to image file
 
+    # Dedalus semantic search embedding (stored as JSON list of floats)
+    embedding = db.Column(db.Text, nullable=True)  # JSON-encoded vector
+
     def to_dict(self):
         return {
             'id': self.id,

@@ -60,6 +60,16 @@ if (workbox) {
         })
     );
 
+    // Dedalus-powered endpoints — Network Only (never cache, graceful failure = client-side fallback)
+    workbox.routing.registerRoute(
+        new RegExp('/api/search'),
+        new workbox.strategies.NetworkOnly()
+    );
+    workbox.routing.registerRoute(
+        new RegExp('/api/transcribe'),
+        new workbox.strategies.NetworkOnly()
+    );
+
     workbox.routing.registerRoute(
         new RegExp('/api/locations'),
         new workbox.strategies.NetworkFirst({

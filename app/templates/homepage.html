@@ -199,6 +199,15 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                     <input id="searchInput" type="text" placeholder="Search tools, kitchenware..." class="flex-1 outline-none text-gray-600 placeholder-gray-400">
+                    <!-- Mic button (push-to-talk) -->
+                    <button id="micBtn" type="button" class="rounded-full p-2.5 flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors" title="Hold to speak">
+                        <svg id="micIcon" class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-14 0m7 7v4m-4 0h8m-4-18a3 3 0 00-3 3v4a3 3 0 006 0V7a3 3 0 00-3-3z"/>
+                        </svg>
+                        <svg id="micIconRecording" class="w-5 h-5 text-red-500 hidden animate-pulse" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3zM19 10v1a7 7 0 01-14 0v-1H3v1a9 9 0 004 7.46V22h2v-3.08c.33.05.66.08 1 .08s.67-.03 1-.08V22h2v-3.54A9 9 0 0021 11v-1h-2z"/>
+                        </svg>
+                    </button>
                     <button id="filterBtn" class="bg-gray-100 rounded-full p-2.5 flex items-center gap-2 cursor-pointer hover:bg-gray-200">
                         <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <line x1="4" y1="6" x2="20" y2="6" stroke-width="2" stroke-linecap="round"/>
@@ -590,14 +599,212 @@
         // Render initial sidebar state
         showNearbyItems();
 
-        // Search filtering — re-render current view on each keystroke
-        document.getElementById('searchInput').addEventListener('input', function() {
+        // ─── Semantic search with offline fallback ───────────────
+        let _searchDebounce = null;
+        let _lastSemanticResults = null;  // cache last server results
+
+        function _doClientSideSearch() {
             if (_viewingLocation && _currentLocation) {
                 showLocationItems(_currentLocation);
             } else {
                 showNearbyItems();
             }
+        }
+
+        function _renderSemanticResults(results) {
+            const sidebar = document.getElementById('sidebar');
+            let html = '<div class="flex items-center justify-between mb-6">';
+            html += '<div class="flex items-center gap-2">';
+            html += '<div class="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">';
+            html += '<svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"/></svg>';
+            html += '</div>';
+            html += '<h2 class="text-xl font-semibold text-gray-800">Search Results</h2>';
+            html += '</div></div>';
+
+            if (results.length === 0) {
+                html += '<p class="text-gray-500 text-sm">No matching items found.</p>';
+            } else {
+                html += '<div class="space-y-4">';
+                results.forEach(function(item) {
+                    // Use score-based relevance hint if available
+                    var distText = '';
+                    if (item.score !== undefined) {
+                        distText = (item.score * 100).toFixed(0) + '% match';
+                    }
+                    html += _renderItemCard(item, distText);
+                });
+                html += '</div>';
+            }
+            sidebar.innerHTML = html;
+        }
+
+        function _trySemanticSearch(query) {
+            // Build request body with current filters
+            var refLat = (typeof userLat !== 'undefined' && userLat !== null) ? userLat : (typeof map !== 'undefined' ? map.getCenter().lat : null);
+            var refLng = (typeof userLng !== 'undefined' && userLng !== null) ? userLng : (typeof map !== 'undefined' ? map.getCenter().lng : null);
+
+            var body = {
+                query: query,
+                categories: selectedCategories,
+                radius: selectedRadius,
+                lat: refLat,
+                lng: refLng
+            };
+
+            fetch('/api/search', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body),
+                signal: AbortSignal.timeout(5000)  // 5s timeout
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.fallback) {
+                    // Server says use client-side (no API key, empty query, etc.)
+                    _doClientSideSearch();
+                } else {
+                    _lastSemanticResults = data.results;
+                    _renderSemanticResults(data.results);
+                }
+            })
+            .catch(function() {
+                // Network error / offline — fall back to client-side
+                _doClientSideSearch();
+            });
+        }
+
+        // Search filtering — debounced semantic search with instant client-side fallback
+        document.getElementById('searchInput').addEventListener('input', function() {
+            clearTimeout(_searchDebounce);
+            var query = this.value.trim();
+
+            if (!query) {
+                // Empty query — immediate client-side render
+                _lastSemanticResults = null;
+                _doClientSideSearch();
+                return;
+            }
+
+            // Instant client-side filter while waiting for server
+            _doClientSideSearch();
+
+            // Debounced semantic search
+            _searchDebounce = setTimeout(function() {
+                _trySemanticSearch(query);
+            }, 350);
         });
+
+        // ─── Push-to-talk microphone ─────────────────────────────────
+        (function() {
+            var micBtn = document.getElementById('micBtn');
+            var micIcon = document.getElementById('micIcon');
+            var micIconRec = document.getElementById('micIconRecording');
+            var searchInput = document.getElementById('searchInput');
+            var mediaRecorder = null;
+            var audioChunks = [];
+            var isRecording = false;
+
+            // Hide mic button if MediaRecorder not supported or offline
+            if (!navigator.mediaDevices || !window.MediaRecorder) {
+                micBtn.style.display = 'none';
+            }
+
+            function startRecording() {
+                audioChunks = [];
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(function(stream) {
+                        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+                        mediaRecorder.ondataavailable = function(e) {
+                            if (e.data.size > 0) audioChunks.push(e.data);
+                        };
+                        mediaRecorder.onstop = function() {
+                            // Stop all tracks to release mic
+                            stream.getTracks().forEach(function(t) { t.stop(); });
+                            var blob = new Blob(audioChunks, { type: 'audio/webm' });
+                            sendAudioForTranscription(blob);
+                        };
+                        mediaRecorder.start();
+                        isRecording = true;
+                        micIcon.classList.add('hidden');
+                        micIconRec.classList.remove('hidden');
+                    })
+                    .catch(function() {
+                        // Mic permission denied — silently fail
+                    });
+            }
+
+            function stopRecording() {
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.stop();
+                }
+                isRecording = false;
+                micIcon.classList.remove('hidden');
+                micIconRec.classList.add('hidden');
+            }
+
+            function sendAudioForTranscription(blob) {
+                // Show loading state
+                searchInput.placeholder = 'Transcribing...';
+                searchInput.disabled = true;
+
+                var formData = new FormData();
+                formData.append('audio', blob, 'recording.webm');
+
+                fetch('/api/transcribe', {
+                    method: 'POST',
+                    body: formData,
+                    signal: AbortSignal.timeout(10000)
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    searchInput.disabled = false;
+                    searchInput.placeholder = 'Search tools, kitchenware...';
+                    if (data.text) {
+                        searchInput.value = data.text;
+                        // Trigger semantic search with transcribed text
+                        _trySemanticSearch(data.text);
+                    }
+                })
+                .catch(function() {
+                    searchInput.disabled = false;
+                    searchInput.placeholder = 'Search tools, kitchenware...';
+                });
+            }
+
+            // Push-to-talk: mousedown/touchstart to start, mouseup/touchend to stop
+            micBtn.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                startRecording();
+            });
+            micBtn.addEventListener('mouseup', function(e) {
+                e.preventDefault();
+                if (isRecording) stopRecording();
+            });
+            micBtn.addEventListener('mouseleave', function() {
+                if (isRecording) stopRecording();
+            });
+            // Touch support for mobile
+            micBtn.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                startRecording();
+            });
+            micBtn.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                if (isRecording) stopRecording();
+            });
+
+            // Hide mic when offline, show when online
+            function updateMicVisibility() {
+                if (!navigator.onLine) {
+                    micBtn.style.display = 'none';
+                } else if (navigator.mediaDevices && window.MediaRecorder) {
+                    micBtn.style.display = '';
+                }
+            }
+            window.addEventListener('online', updateMicVisibility);
+            window.addEventListener('offline', updateMicVisibility);
+            updateMicVisibility();
+        })();
     </script>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
