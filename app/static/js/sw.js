@@ -15,12 +15,24 @@ self.addEventListener('activate', (event) => {
 if (workbox) {
     console.log("Workbox is loaded");
 
-    // 1. Pre-cache the App Shell (The basics to make the page load)
+    // 1. Pre-cache the App Shell (static assets only — NOT pages with auth-dependent HTML)
     workbox.precaching.precacheAndRoute([
-        { url: '/', revision: '3' },
         { url: '/static/css/main.css', revision: '3' },
         { url: '/static/js/map.js', revision: '3' }
     ]);
+
+    // Homepage contains Jinja-rendered auth state, so always fetch from server first
+    workbox.routing.registerRoute(
+        ({url}) => url.pathname === '/',
+        new workbox.strategies.NetworkFirst({
+            cacheName: 'pages-cache-v1',
+            plugins: [
+                new workbox.cacheableResponse.CacheableResponsePlugin({
+                    statuses: [0, 200]
+                })
+            ]
+        })
+    );
 
     workbox.routing.registerRoute(
         ({url}) => url.host === 'unpkg.com',
