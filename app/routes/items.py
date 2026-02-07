@@ -11,8 +11,22 @@ bp = Blueprint('items', __name__)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
+# Category icon mapping
+CATEGORY_ICONS = {
+    'Tools & Equipment': 'icon-tools',
+    'Kitchen & Appliances': 'icon-kitchen',
+    'Garden & Outdoor': 'icon-garden',
+    'Electronics': 'icon-electronics',
+    'Sports & Recreation': 'icon-sports',
+    'Other': 'icon-other'
+}
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def get_category_icon(category_name):
+    """Get the icon identifier for a category"""
+    return CATEGORY_ICONS.get(category_name, 'icon-other')
 
 
 @bp.route('/api/items/<int:item_id>', methods=['GET'])
@@ -82,6 +96,10 @@ def create_item():
                 if upload_folder:
                     os.makedirs(upload_folder, exist_ok=True)
                     file.save(os.path.join(upload_folder, picture_filename))
+        
+        # If no file uploaded, use category icon
+        if not picture_filename:
+            picture_filename = get_category_icon(category_name)
         
         # Create new item
         new_item = Item(
