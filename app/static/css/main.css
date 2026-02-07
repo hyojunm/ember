@@ -183,3 +183,9 @@ nav.legacy-nav a {
 .btn-main:hover {
     background: #e6a600;
 }
+
+/* Greyscale the map slightly when offline to show it's "Static" */
+.map-offline-locked {
+    filter: grayscale(0.25);
+    cursor: not-allowed !important;
+}

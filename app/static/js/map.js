@@ -10,6 +10,10 @@ const map = L.map('map', {
     zoom: mapZoom,
     minZoom: 12,                 // Maximum zoom out (City view)
     maxZoom: 18,                 // Maximum zoom in (Street view)
+    maxBounds: [                 // Optional: Lock the map to a specific area
+        [40.340, -80.150],         // Southwest coordinates
+        [40.570, -79.750]          // Northeast coordinates
+    ],
     maxBoundsViscosity: 1.0,     // Prevents the user from dragging outside the bounds
     zoomControl: false           // Disable default zoom control
 });
@@ -99,16 +103,6 @@ const layer = protomapsL.leafletLayer({
 });
 
 layer.addTo(map);
-
-// L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-//     maxZoom: 19,
-//     attribution: '© OpenStreetMap'
-// }).addTo(map);
-
-// const layer = L.tileLayer(`pmtiles://${PGH_MAP_URL}`, {
-//     attribution: '&copy; OpenStreetMap'
-// });
-// layer.addTo(map);
 
 const userIcon = L.divIcon({
     className: 'user-location-marker',
@@ -266,7 +260,96 @@ async function loadMapItems() {
     }
 }
 
-loadMapItems();
+let offlineMapAvailable = false;
 
+async function precacheMapData() {
+    const cache = await caches.open('pittsburgh-map-v2');
+
+    // Check if it's already cached
+    const cachedResponse = await cache.match(PGH_MAP_URL);
+    if (cachedResponse) {
+        console.log("📍 Offline map data found in cache.");
+        return;
+    }
+
+    offlineMapAvailable = confirm("Would you like to download map data for offline access?");
+
+    if (offlineMapAvailable) {
+        console.log("📥 Starting 60MB background download of Pittsburgh map...");
+        
+        try {
+            const response = await fetch(PGH_MAP_URL);
+            if (!response.ok) throw new Error('Network error');
+            
+            // This puts the full 60MB into the Workbox-managed cache
+            await cache.put(PGH_MAP_URL, response);
+            console.log("✅ Map cached! You can now go fully offline.");
+        } catch (err) {
+            console.error("❌ Precache failed:", err);
+        }
+    }
+}
+
+// Call this as soon as the page loads
+precacheMapData();
+loadMapItems();
 requestUserLocation();
 
+function toggleMapInteractions() {
+    const mapElement = document.getElementById('map');
+
+    if (navigator.onLine) {
+        map.zoomControl?.enable();
+        map.doubleClickZoom.enable();
+        map.scrollWheelZoom.enable();
+        map.touchZoom.enable();
+
+        console.log("Map zoom enabled (Online)");
+        mapElement.classList.remove('map-offline-locked');
+    } else {
+        map.zoomControl?.disable();
+        map.doubleClickZoom.disable();
+        map.scrollWheelZoom.disable();
+        map.touchZoom.disable();
+        
+        console.log("Map zoom disabled (Offline)");
+        mapElement.classList.add('map-offline-locked');
+    }
+}
+
+// // 2. Listen for connection changes
+// window.addEventListener('online', toggleMapInteractions);
+// window.addEventListener('offline', toggleMapInteractions);
+
+// // 3. Run once on load to set the correct state
+// toggleMapInteractions();
+
+function updateStatusUI() {
+    const badge = document.getElementById('status-badge');
+    const indicator = document.getElementById('status-indicator');
+    const pulse = document.getElementById('status-pulse');
+    const text = document.getElementById('status-text');
+
+    if (navigator.onLine) {
+        // Online State
+        indicator.classList.remove('bg-red-500');
+        indicator.classList.add('bg-green-500');
+        pulse.classList.add('hidden');
+        text.innerText = "Online";
+        text.classList.remove('text-red-600');
+        text.classList.add('text-gray-700');
+    } else {
+        // Offline State
+        indicator.classList.remove('bg-green-500');
+        indicator.classList.add('bg-red-500');
+        pulse.classList.remove('hidden'); // Shows the ping animation
+        text.innerText = "Offline Mode";
+        text.classList.remove('text-gray-700');
+        text.classList.add('text-red-600');
+    }
+}
+
+window.addEventListener('online', updateStatusUI);
+window.addEventListener('offline', updateStatusUI);
+
+updateStatusUI();

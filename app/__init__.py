@@ -3,7 +3,6 @@ from flask import Flask
 from flask import jsonify, render_template, send_from_directory, redirect, url_for
 from flask_login import current_user
 from .models import Item, User
-from sqlalchemy.orm import joinedload
 import os
 
 
@@ -61,22 +60,14 @@ def edit_listing(item_id):
 def account_info():
     return render_template('account_info.html')
 
-@app.route('/api/items', methods=['GET'])
-def get_items():
-    # Load items and 'eagerly' join their related location and category
-    items = Item.query.options(
-        joinedload(Item.location),
-        joinedload(Item.category),
-        joinedload(Item.owner)
-    ).filter_by(is_available=True).all()
-    
-    return jsonify([item.to_dict() for item in items])
-
 
 # serve pwa files from root
 @app.route('/sw.js')
 def serve_sw():
-    return send_from_directory(os.path.join(app.root_path, 'static/js'), 'sw.js')
+    response = send_from_directory(os.path.join(app.root_path, 'static/js'), 'sw.js')
+    response.headers['Service-Worker-Allowed'] = '/'
+
+    return response
 
 
 @app.route('/manifest.json')
@@ -92,7 +83,12 @@ def serve_upload(filename):
 @app.route('/static/maps/<path:filename>')
 def serve_pmtiles(filename):
     # 'conditional=True' tells Flask to support HTTP Range Requests
-    return send_from_directory(os.path.join(app.root_path, 'static/maps'), filename, conditional=True)
+    response = send_from_directory(os.path.join(app.root_path, 'static/maps'), filename, conditional=True)
+    response.headers['Cache-Control'] = 'public, max-age=31536000'
+    response.headers['Accept-Ranges'] = 'bytes'
+    response.headers['Content-Type'] = 'application/octet-stream'
+
+    return response
 
 
 if __name__ == '__main__':

@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
 from ..extensions import db
 from ..models import Item, Category, Location
+from sqlalchemy.orm import joinedload
 import os
 
 bp = Blueprint('items', __name__)
@@ -42,6 +43,18 @@ def get_item(item_id):
     """Get a single item by ID"""
     item = Item.query.get_or_404(item_id)
     return jsonify(item.to_dict()), 200
+
+
+@bp.route('/api/items', methods=['GET'])
+def get_items():
+    # Load items and 'eagerly' join their related location and category
+    items = Item.query.options(
+        joinedload(Item.location),
+        joinedload(Item.category),
+        joinedload(Item.owner)
+    ).filter_by(is_available=True).all()
+    
+    return jsonify([item.to_dict() for item in items])
 
 
 @bp.route('/api/items', methods=['POST'])
