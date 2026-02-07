@@ -8,8 +8,14 @@ const map = L.map('map', {
     zoom: mapZoom,
     minZoom: 12,                 // Maximum zoom out (City view)
     maxZoom: 18,                 // Maximum zoom in (Street view)
-    maxBoundsViscosity: 1.0      // Prevents the user from dragging outside the bounds
+    maxBoundsViscosity: 1.0,     // Prevents the user from dragging outside the bounds
+    zoomControl: false           // Disable default zoom control
 });
+
+// Add zoom control to bottom right
+L.control.zoom({
+    position: 'bottomright'
+}).addTo(map);
 
 // Save map position on every move/zoom
 map.on('moveend', function() {
