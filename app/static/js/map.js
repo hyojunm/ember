@@ -23,6 +23,7 @@ async function loadMapItems() {
         const items = await response.json();
 
         items.forEach(item => {
+            console.log(item);
             if (item.latitude && item.longitude) {
                 const marker = L.marker([item.latitude, item.longitude]).addTo(map);
                 marker.bindPopup(`

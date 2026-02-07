@@ -31,23 +31,41 @@ class Item(db.Model):
     
     # Core Details
     item_name = db.Column(db.String(100), nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
     is_borrow = db.Column(db.Boolean, default=False)
     item_desc = db.Column(db.Text)
     quantity = db.Column(db.Integer, default=1)
+    
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    category = db.relationship('Category', backref='items', lazy=True)
     
     # Status Tracking
     is_available = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Geography
-    location_id = db.Column(db.Integer, db.ForeignKey('location.id'))
-    latitude = db.Column(db.Float) # Best for Leaflet/Offline Maps
-    longitude = db.Column(db.Float)
+    location_id = db.Column(db.Integer, db.ForeignKey('location.id'), nullable=False)
     pickup_instructions = db.Column(db.Text) # e.g. "On the porch"
     
     # picture
     picture = db.Column(db.String(100)) # Path to image file
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.item_name,
+            'category': self.category.name if self.category else "Uncategorized",
+            'is_borrow': self.is_borrow,
+            'description': self.item_desc,
+            'quantity': self.quantity,
+            'available': self.is_available,
+            'created_at': self.created_at.isoformat(),
+            'latitude': self.location.latitude,
+            'longitude': self.location.longitude,
+            'address': self.location.address,
+            'location_name': self.location.name,
+            'owner_name': self.owner.username,
+            'picture': self.picture
+        }
 
 
 class Category(db.Model): # Optional: If you want a strict list
@@ -57,6 +75,11 @@ class Category(db.Model): # Optional: If you want a strict list
 
 class Location(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
+    
+    name = db.Column(db.String(100))
+    address = db.Column(db.String(100), nullable=False)
+
     latitude = db.Column(db.Float, nullable=False)
     longitude = db.Column(db.Float, nullable=False)
+
+    items = db.relationship('Item', backref='location', lazy=True)
