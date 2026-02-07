@@ -69,21 +69,22 @@ async function loadMapItems() {
             if (item.latitude && item.longitude) {
                 const key = `${item.latitude},${item.longitude}`;
                 if (!locations[key]) {
-                    locations[key] = { lat: item.latitude, lng: item.longitude, location_name: item.location_name, items: [] };
+                    locations[key] = { lat: item.latitude, lng: item.longitude, location_name: item.location_name, address: item.address, items: [] };
                 }
                 locations[key].items.push(item);
             }
         });
 
-        // Create one marker per location with all items in the popup
+        // Create one marker per location with tooltip and click handler
         Object.values(locations).forEach(loc => {
             const marker = L.marker([loc.lat, loc.lng]).addTo(map);
-            const itemsHtml = loc.items.map(item => `
-                <strong>${item.name}</strong><br>
-                ${item.description}<br>
-                <button onclick="contactOwner(${item.id})">Request</button>
-            `).join('<hr>');
-            marker.bindPopup(`<h3>${loc.location_name}</h3>${itemsHtml}`);
+            const previewNames = loc.items.slice(0, 3).map(i => i.name).join(', ');
+            const extra = loc.items.length > 3 ? ` +${loc.items.length - 3} more` : '';
+            const tooltipHtml = `<strong>${loc.location_name}</strong><br>${loc.address || ''}<br><em>${previewNames}${extra}</em>`;
+            marker.bindTooltip(tooltipHtml);
+            marker.on('click', () => {
+                if (typeof showLocationItems === 'function') showLocationItems(loc);
+            });
         });
 
         // Also load standalone locations (no items yet)
@@ -92,8 +93,13 @@ async function loadMapItems() {
         allLocations.forEach(loc => {
             const key = `${loc.latitude},${loc.longitude}`;
             if (!locations[key]) {
-                L.marker([loc.latitude, loc.longitude]).addTo(map)
-                    .bindPopup(`<h3>${loc.name || loc.address}</h3>`);
+                const standaloneMarker = L.marker([loc.latitude, loc.longitude]).addTo(map);
+                standaloneMarker.bindTooltip(`<strong>${loc.name || loc.address}</strong><br>${loc.address || ''}`);
+                standaloneMarker.on('click', () => {
+                    if (typeof showLocationItems === 'function') {
+                        showLocationItems({ location_name: loc.name || loc.address, address: loc.address, items: [] });
+                    }
+                });
             }
         });
     } catch (err) {
