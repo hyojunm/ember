@@ -16,6 +16,47 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap'
 }).addTo(map);
 
+const userIcon = L.divIcon({
+    className: 'user-location-marker',
+    html: '<div class="user-location-pulse" aria-hidden="true"></div>',
+    iconSize: [18, 18],
+    iconAnchor: [9, 9]
+});
+
+let userMarker = null;
+
+function setUserLocation(lat, lng) {
+    const coords = [lat, lng];
+    map.setView(coords, Math.max(map.getZoom(), 15));
+
+    if (!userMarker) {
+        userMarker = L.marker(coords, { icon: userIcon, zIndexOffset: 1000 }).addTo(map);
+    } else {
+        userMarker.setLatLng(coords);
+    }
+}
+
+function requestUserLocation() {
+    if (!navigator.geolocation) {
+        console.log('Geolocation not supported.');
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            setUserLocation(pos.coords.latitude, pos.coords.longitude);
+        },
+        (err) => {
+            console.log('Location request failed:', err.message);
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 8000,
+            maximumAge: 60000
+        }
+    );
+}
+
 // Fetch items from your Flask API
 async function loadMapItems() {
     try {
@@ -39,3 +80,10 @@ async function loadMapItems() {
 }
 
 loadMapItems();
+
+requestUserLocation();
+
+map.on('dblclick', (event) => {
+    const coords = event.latlng;
+    L.marker(coords).addTo(map);
+});
