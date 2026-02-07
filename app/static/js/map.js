@@ -63,16 +63,27 @@ async function loadMapItems() {
         const response = await fetch('/api/items');
         const items = await response.json();
 
+        // Group items by location coordinates
+        const locations = {};
         items.forEach(item => {
-            console.log(item);
             if (item.latitude && item.longitude) {
-                const marker = L.marker([item.latitude, item.longitude]).addTo(map);
-                marker.bindPopup(`
-                    <strong>${item.item_name}</strong><br>
-                    ${item.item_desc}<br>
-                    <button onclick="contactOwner(${item.user_id})">Request</button>
-                `);
+                const key = `${item.latitude},${item.longitude}`;
+                if (!locations[key]) {
+                    locations[key] = { lat: item.latitude, lng: item.longitude, location_name: item.location_name, items: [] };
+                }
+                locations[key].items.push(item);
             }
+        });
+
+        // Create one marker per location with all items in the popup
+        Object.values(locations).forEach(loc => {
+            const marker = L.marker([loc.lat, loc.lng]).addTo(map);
+            const itemsHtml = loc.items.map(item => `
+                <strong>${item.name}</strong><br>
+                ${item.description}<br>
+                <button onclick="contactOwner(${item.id})">Request</button>
+            `).join('<hr>');
+            marker.bindPopup(`<h3>${loc.location_name}</h3>${itemsHtml}`);
         });
     } catch (err) {
         console.log("Map loading offline mode - showing cached data");
