@@ -1,6 +1,6 @@
 from .extensions import db, login_manager
 from flask import Flask
-from flask import jsonify, render_template, send_from_directory, redirect, url_for
+from flask import jsonify, make_response, render_template, send_from_directory, redirect, url_for
 from flask_login import current_user
 from .models import Item, User
 import os
@@ -108,14 +108,14 @@ def serve_upload(filename):
 
 @app.route('/static/maps/<path:filename>')
 def serve_pmtiles(filename):
-    path = os.path.join(app.root_path, 'static/maps', filename)
+    path = os.path.join(app.root_path, 'static', 'maps', filename)
     size = os.path.getsize(path)
     
-    response = send_from_directory(os.path.join(app.root_path, 'static/maps'), filename, conditional=True)
+    response = make_response(send_from_directory(os.path.join(app.root_path, 'static/maps'), filename, conditional=True))
     
     # Force these headers to satisfy Mac/Unix byte-serving
     response.headers['Cache-Control'] = 'public, max-age=31536000'
-    response.headers['Content-Length'] = size
+    response.headers['Content-Length'] = str(size)
     response.headers['Accept-Ranges'] = 'bytes'
     response.headers['Content-Type'] = 'application/octet-stream'
     

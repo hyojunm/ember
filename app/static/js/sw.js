@@ -1,6 +1,17 @@
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.4.1/workbox-sw.js');
 workbox.loadModule('workbox-range-requests');
 
+// 1. Force the SW to become active immediately
+self.addEventListener('install', (event) => {
+    self.skipWaiting(); 
+});
+
+// 2. Force the SW to start intercepting requests for all open tabs immediately
+self.addEventListener('activate', (event) => {
+    event.waitUntil(clients.claim());
+    console.log("🚀 Service Worker active and claiming clients!");
+});
+
 if (workbox) {
     console.log("Workbox is loaded");
 
@@ -102,22 +113,33 @@ if (workbox) {
 self.addEventListener('fetch', (event) => {
     if (event.request.url.includes('pittsburgh-pa.pmtiles')) {
         event.respondWith(
-            (async () => {
-                const cache = await caches.open('pittsburgh-map-v2');
-                const cachedResponse = await cache.match(event.request.url);
-
+            caches.match(event.request.url).then(cachedResponse => {
                 if (cachedResponse) {
-                    // Use the Workbox Range Handler to slice the cached 200 response 
-                    // into the 206 Partial Content the map is asking for.
-                    return await workbox.rangeRequests.createPartialResponse(
-                        event.request, 
-                        cachedResponse
-                    );
+                    // The workbox plugin handles the 416/206 logic automatically
+                    return workbox.rangeRequests.createPartialResponse(event.request, cachedResponse);
                 }
-
-                // Fallback to network if not in cache
                 return fetch(event.request);
-            })()
+            })
         );
     }
+    // if (event.request.url.includes('pittsburgh-pa.pmtiles')) {
+    //     event.respondWith(
+    //         (async () => {
+    //             // const cache = await caches.open('pittsburgh-map-v2');
+    //             const cachedResponse = await cache.match(event.request.url);
+
+    //             if (cachedResponse) {
+    //                 // Use the Workbox Range Handler to slice the cached 200 response 
+    //                 // into the 206 Partial Content the map is asking for.
+    //                 return await workbox.rangeRequests.createPartialResponse(
+    //                     event.request, 
+    //                     cachedResponse
+    //                 );
+    //             }
+
+    //             // Fallback to network if not in cache
+    //             return fetch(event.request);
+    //         })()
+    //     );
+    // }
 });
