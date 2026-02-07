@@ -12,6 +12,8 @@ base_dir = os.path.abspath(os.path.dirname(__file__))
 app.config['SECRET_KEY'] = 'BoilerUp!' # TODO: use environment variable
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(base_dir, 'site.db') # TODO: use postgresql
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False # ???
+app.config['UPLOAD_FOLDER'] = os.path.join(base_dir, 'static', 'uploads')
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 db.init_app(app)
 login_manager.init_app(app)
@@ -79,6 +81,11 @@ def serve_sw():
 @app.route('/manifest.json')
 def serve_manifest():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'manifest.json')
+
+
+@app.route('/uploads/<filename>')
+def serve_upload(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
 if __name__ == '__main__':

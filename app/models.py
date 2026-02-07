@@ -17,12 +17,53 @@ class User(UserMixin, db.Model):
     
     # Relationship: One user can share many items
     items = db.relationship('Item', backref='owner', lazy=True)
+    
+    # Relationship: One user can have many saved locations
+    saved_locations = db.relationship('SavedLocation', backref='user', lazy=True, cascade='all, delete-orphan')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
     
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+    def get_saved_locations(self):
+        """Get all saved locations for this user"""
+        return [location.to_dict() for location in self.saved_locations]
+    
+    def add_saved_location(self, name, address, latitude, longitude):
+        """Add a new saved location for this user"""
+        # Check if location already exists for this user
+        existing = SavedLocation.query.filter_by(
+            user_id=self.id,
+            latitude=latitude,
+            longitude=longitude
+        ).first()
+        
+        if existing:
+            return existing
+        
+        new_location = SavedLocation(
+            user_id=self.id,
+            name=name,
+            address=address,
+            latitude=latitude,
+            longitude=longitude
+        )
+        db.session.add(new_location)
+        return new_location
+    
+    def remove_saved_location(self, location_id):
+        """Remove a saved location by ID"""
+        location = SavedLocation.query.filter_by(
+            id=location_id,
+            user_id=self.id
+        ).first()
+        
+        if location:
+            db.session.delete(location)
+            return True
+        return False
 
 
 class Item(db.Model):
@@ -83,3 +124,27 @@ class Location(db.Model):
     longitude = db.Column(db.Float, nullable=False)
 
     items = db.relationship('Item', backref='location', lazy=True)
+
+
+class SavedLocation(db.Model):
+    """User's saved locations for quick selection when creating listings"""
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    name = db.Column(db.String(100), nullable=False)  # e.g., "Home", "Office", "Apartment"
+    address = db.Column(db.String(200), nullable=False)
+    
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'address': self.address,
+            'latitude': self.latitude,
+            'longitude': self.longitude,
+            'created_at': self.created_at.isoformat()
+        }
