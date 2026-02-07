@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from flask_login import login_required
 from ..extensions import db
 from ..models import Location
 
@@ -18,6 +19,7 @@ def get_locations():
 
 
 @bp.route('/api/locations', methods=['POST'])
+@login_required
 def create_location():
     data = request.get_json()
 
