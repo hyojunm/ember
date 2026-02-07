@@ -260,6 +260,8 @@ async function loadMapItems() {
     }
 }
 
+let offlineMapAvailable = false;
+
 async function precacheMapData() {
     const cache = await caches.open('pittsburgh-map-v2');
 
@@ -270,9 +272,9 @@ async function precacheMapData() {
         return;
     }
 
-    const download = confirm("Would you like to download map data for offline access?");
+    offlineMapAvailable = confirm("Would you like to download map data for offline access?");
 
-    if (download) {
+    if (offlineMapAvailable) {
         console.log("📥 Starting 60MB background download of Pittsburgh map...");
         
         try {
@@ -321,3 +323,33 @@ function toggleMapInteractions() {
 
 // // 3. Run once on load to set the correct state
 // toggleMapInteractions();
+
+function updateStatusUI() {
+    const badge = document.getElementById('status-badge');
+    const indicator = document.getElementById('status-indicator');
+    const pulse = document.getElementById('status-pulse');
+    const text = document.getElementById('status-text');
+
+    if (navigator.onLine) {
+        // Online State
+        indicator.classList.remove('bg-red-500');
+        indicator.classList.add('bg-green-500');
+        pulse.classList.add('hidden');
+        text.innerText = "Online";
+        text.classList.remove('text-red-600');
+        text.classList.add('text-gray-700');
+    } else {
+        // Offline State
+        indicator.classList.remove('bg-green-500');
+        indicator.classList.add('bg-red-500');
+        pulse.classList.remove('hidden'); // Shows the ping animation
+        text.innerText = "Offline Mode";
+        text.classList.remove('text-gray-700');
+        text.classList.add('text-red-600');
+    }
+}
+
+window.addEventListener('online', updateStatusUI);
+window.addEventListener('offline', updateStatusUI);
+
+updateStatusUI();

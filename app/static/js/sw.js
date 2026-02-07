@@ -1,4 +1,5 @@
 importScripts('https://storage.googleapis.com/workbox-cdn/releases/6.4.1/workbox-sw.js');
+workbox.loadModule('workbox-range-requests');
 
 if (workbox) {
     console.log("Workbox is loaded");
@@ -98,14 +99,25 @@ if (workbox) {
     console.log("Workbox failed to load");
 }
 
-// At the bottom of sw.js
 self.addEventListener('fetch', (event) => {
-    // If we are offline and it's not in the cache, stop the error
-    if (!navigator.onLine && !event.request.url.includes('localhost')) {
+    if (event.request.url.includes('pittsburgh-pa.pmtiles')) {
         event.respondWith(
-            caches.match(event.request).then((response) => {
-                return response || new Response('', { status: 404, statusText: 'Offline' });
-            })
+            (async () => {
+                const cache = await caches.open('pittsburgh-map-v2');
+                const cachedResponse = await cache.match(event.request.url);
+
+                if (cachedResponse) {
+                    // Use the Workbox Range Handler to slice the cached 200 response 
+                    // into the 206 Partial Content the map is asking for.
+                    return await workbox.rangeRequests.createPartialResponse(
+                        event.request, 
+                        cachedResponse
+                    );
+                }
+
+                // Fallback to network if not in cache
+                return fetch(event.request);
+            })()
         );
     }
 });

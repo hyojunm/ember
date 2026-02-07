@@ -85,6 +85,8 @@ def serve_pmtiles(filename):
     # 'conditional=True' tells Flask to support HTTP Range Requests
     response = send_from_directory(os.path.join(app.root_path, 'static/maps'), filename, conditional=True)
     response.headers['Cache-Control'] = 'public, max-age=31536000'
+    response.headers['Accept-Ranges'] = 'bytes'
+    response.headers['Content-Type'] = 'application/octet-stream'
 
     return response
 
