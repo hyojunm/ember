@@ -47,8 +47,21 @@
                 <h1 class="text-3xl font-bold text-gray-800 text-center mb-2">Create Account</h1>
                 <p class="text-gray-600 text-center mb-8">Join your local borrowing community</p>
 
+                <!-- Flash Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                <div class="mb-4 space-y-2">
+                    {% for category, message in messages %}
+                    <div class="px-4 py-3 rounded-xl text-sm font-medium {% if category == 'danger' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                        {{ message }}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% endwith %}
+
                 <!-- Form -->
-                <form class="space-y-5">
+                <form method="POST" action="/create-account" class="space-y-5">
                     <!-- Username Field -->
                     <div>
                         <label class="block text-gray-800 font-semibold mb-2 text-sm">Username</label>
@@ -60,7 +73,9 @@
                             </div>
                             <input
                                 type="text"
+                                name="username"
                                 placeholder="Choose a username"
+                                required
                                 class="w-full pl-12 pr-4 py-3.5 bg-white/70 backdrop-blur-sm border-none rounded-2xl text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-all"
                             >
                         </div>
@@ -77,6 +92,7 @@
                             </div>
                             <input
                                 type="tel"
+                                name="phone"
                                 placeholder="+1 (555) 000-0000"
                                 class="w-full pl-12 pr-4 py-3.5 bg-white/70 backdrop-blur-sm border-none rounded-2xl text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-all"
                             >
@@ -94,7 +110,9 @@
                             </div>
                             <input
                                 type="password"
+                                name="password"
                                 placeholder="••••••••"
+                                required
                                 class="w-full pl-12 pr-12 py-3.5 bg-white/70 backdrop-blur-sm border-none rounded-2xl text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-all"
                             >
                             <button type="button" class="absolute right-4 top-1/2 -translate-y-1/2">
@@ -117,7 +135,9 @@
                             </div>
                             <input
                                 type="password"
+                                name="confirm_password"
                                 placeholder="••••••••"
+                                required
                                 class="w-full pl-12 pr-4 py-3.5 bg-white/70 backdrop-blur-sm border-none rounded-2xl text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white transition-all"
                             >
                         </div>
@@ -135,7 +155,7 @@
                 <!-- Sign In Link -->
                 <p class="text-center mt-6 text-gray-600 text-sm">
                     Already have an account?
-                    <a href="#" class="text-orange-500 font-semibold hover:text-orange-600">Sign In</a>
+                    <a href="/login" class="text-orange-500 font-semibold hover:text-orange-600">Sign In</a>
                 </p>
             </div>
         </div>

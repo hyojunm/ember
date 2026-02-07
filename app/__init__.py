@@ -55,11 +55,6 @@ def edit_listing():
 def account_info():
     return render_template('account_info.html')
 
-@app.route('/create-account')
-def create_account():
-    return render_template('create_account.html')
-
-
 @app.route('/api/items', methods=['GET'])
 def get_items():
     # Load items and 'eagerly' join their related location and category
