@@ -159,10 +159,10 @@
             </div>
         </div>
 
-        <!-- Nearby Items Section -->
+        <!-- Sidebar Section -->
         <div class="px-4 pt-4 max-w-[460px] h-[calc(100vh-8.5rem)] pointer-events-auto">
-            <div class="bg-white/95 backdrop-blur rounded-3xl shadow-xl p-6 h-full overflow-y-auto">
-                <!-- Section Header -->
+            <div id="sidebar" class="bg-white/95 backdrop-blur rounded-3xl shadow-xl p-6 h-full overflow-y-auto">
+                <!-- Default: Nearby Items -->
                 <div class="flex items-center justify-between mb-6">
                     <div class="flex items-center gap-2">
                         <div class="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
@@ -172,91 +172,8 @@
                         </div>
                         <h2 class="text-xl font-semibold text-gray-800">Nearby Items</h2>
                     </div>
-                    <button class="text-sm text-gray-500 flex items-center gap-1 hover:text-gray-700">
-                        <span class="uppercase font-medium">Sort</span>
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                        </svg>
-                    </button>
                 </div>
-
-                <!-- Item Cards -->
-                <div class="space-y-4">
-                    <!-- Item 1: DeWalt Drill -->
-                    <div class="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 hover:shadow-lg transition-shadow">
-                        <div class="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
-                            <img src="https://images.unsplash.com/photo-1504148455328-c376907d081c?w=200" alt="Drill" class="w-full h-full object-cover">
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-gray-800 mb-1">DeWalt Cordless Drill</h3>
-                            <div class="flex items-center gap-1 text-sm text-orange-500">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                                </svg>
-                                <span>0.2 miles away</span>
-                            </div>
-                            <div class="flex gap-2 mt-3">
-                                <button class="px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg font-medium">Chat</button>
-                                <button class="flex-1 px-4 py-1.5 text-sm bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600">Borrow</button>
-                            </div>
-                        </div>
-                        <button class="text-gray-300 hover:text-orange-500">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <!-- Item 2: KitchenAid Mixer -->
-                    <div class="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 hover:shadow-lg transition-shadow">
-                        <div class="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
-                            <img src="https://images.unsplash.com/photo-1578269174936-2709b6aeb913?w=200" alt="Mixer" class="w-full h-full object-cover">
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-gray-800 mb-1">KitchenAid Stand Mixer</h3>
-                            <div class="flex items-center gap-1 text-sm text-orange-500">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                                </svg>
-                                <span>0.8 miles away</span>
-                            </div>
-                            <div class="flex gap-2 mt-3">
-                                <button class="px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg font-medium">Chat</button>
-                                <button class="flex-1 px-4 py-1.5 text-sm bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600">Borrow</button>
-                            </div>
-                        </div>
-                        <button class="text-gray-300 hover:text-orange-500">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
-                            </svg>
-                        </button>
-                    </div>
-
-                    <!-- Item 3: Lawn Mower -->
-                    <div class="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 hover:shadow-lg transition-shadow">
-                        <div class="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">
-                            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200" alt="Lawn Mower" class="w-full h-full object-cover">
-                        </div>
-                        <div class="flex-1">
-                            <h3 class="font-semibold text-gray-800 mb-1">Lawn Mower XR</h3>
-                            <div class="flex items-center gap-1 text-sm text-orange-500">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
-                                </svg>
-                                <span>1.4 miles away</span>
-                            </div>
-                            <div class="flex gap-2 mt-3">
-                                <button class="px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg font-medium">Chat</button>
-                                <button class="flex-1 px-4 py-1.5 text-sm bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600">Borrow</button>
-                            </div>
-                        </div>
-                        <button class="text-gray-300 hover:text-orange-500">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+                <p class="text-gray-500 text-sm">Click a marker on the map to see items at that location.</p>
             </div>
         </div>
 
@@ -278,6 +195,67 @@
                 dropdown.classList.add('hidden');
             }
         });
+
+        // Sidebar: default content stored for restoring
+        const _sidebarDefault = document.getElementById('sidebar').innerHTML;
+
+        function showLocationItems(loc) {
+            const sidebar = document.getElementById('sidebar');
+            const locationName = loc.location_name || loc.name || 'Unknown Location';
+            const escName = locationName.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const escAddr = (loc.address || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+            let html = '';
+
+            // Header with back button
+            html += '<div class="flex items-center gap-3 mb-2">';
+            html += '<button onclick="showNearbyItems()" class="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center flex-shrink-0">';
+            html += '<svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>';
+            html += '</button>';
+            html += '<div>';
+            html += '<h2 class="text-xl font-semibold text-gray-800">' + escName + '</h2>';
+            if (escAddr) html += '<p class="text-sm text-gray-500">' + escAddr + '</p>';
+            html += '</div>';
+            html += '</div>';
+            html += '<hr class="my-4 border-gray-200">';
+
+            if (!loc.items || loc.items.length === 0) {
+                html += '<p class="text-gray-500 text-sm">No items at this location yet.</p>';
+            } else {
+                html += '<div class="space-y-4">';
+                loc.items.forEach(function(item) {
+                    const itemName = (item.name || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    const itemCategory = (item.category || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                    const imgSrc = item.picture ? '/static/uploads/' + item.picture : '';
+
+                    html += '<div class="bg-white rounded-2xl shadow-md p-4 flex items-center gap-4 hover:shadow-lg transition-shadow">';
+                    html += '<div class="w-24 h-24 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden flex-shrink-0">';
+                    if (imgSrc) {
+                        html += '<img src="' + imgSrc + '" alt="' + itemName + '" class="w-full h-full object-cover">';
+                    } else {
+                        html += '<svg class="w-10 h-10 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clip-rule="evenodd"/></svg>';
+                    }
+                    html += '</div>';
+                    html += '<div class="flex-1 min-w-0">';
+                    html += '<h3 class="font-semibold text-gray-800 mb-1 truncate">' + itemName + '</h3>';
+                    if (itemCategory) {
+                        html += '<span class="inline-block text-xs bg-orange-100 text-orange-600 rounded-full px-2 py-0.5">' + itemCategory + '</span>';
+                    }
+                    html += '<div class="flex gap-2 mt-3">';
+                    html += '<button class="flex-1 px-4 py-1.5 text-sm bg-orange-500 text-white rounded-lg font-medium hover:bg-orange-600">Borrow</button>';
+                    html += '</div>';
+                    html += '</div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            }
+
+            sidebar.innerHTML = html;
+        }
+
+        function showNearbyItems() {
+            document.getElementById('sidebar').innerHTML = _sidebarDefault;
+        }
     </script>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -360,8 +338,13 @@
             .then(() => {
                 closeModal();
                 // Drop a marker at the new location
-                L.marker([data.latitude, data.longitude]).addTo(map)
-                    .bindPopup('<h3>' + (data.name || data.address) + '</h3>');
+                const newMarker = L.marker([data.latitude, data.longitude]).addTo(map);
+                newMarker.bindTooltip('<strong>' + (data.name || data.address) + '</strong><br>' + (data.address || ''));
+                newMarker.on('click', function() {
+                    if (typeof showLocationItems === 'function') {
+                        showLocationItems({ location_name: data.name || data.address, address: data.address, items: [] });
+                    }
+                });
             })
             .catch(err => console.error('Failed to add location:', err));
         });
