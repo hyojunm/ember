@@ -287,7 +287,7 @@ async function loadMapItems() {
 let offlineMapAvailable = false;
 
 async function precacheMapData() {
-    const cache = await caches.open('pittsburgh-map-v2');
+    const cache = await caches.open('pittsburgh-map-v3');
 
     // Check if it's already cached
     const cachedResponse = await cache.match(PGH_MAP_URL);

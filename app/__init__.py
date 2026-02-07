@@ -1,6 +1,6 @@
 from .extensions import db, login_manager
 from flask import Flask
-from flask import jsonify, make_response, render_template, send_from_directory, redirect, url_for
+from flask import jsonify, make_response, render_template, send_from_directory, redirect, request, url_for
 from flask_login import current_user
 from .models import Item, User
 import os
@@ -106,20 +106,57 @@ def serve_upload(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 
-@app.route('/static/maps/<path:filename>')
-def serve_pmtiles(filename):
-    path = os.path.join(app.root_path, 'static', 'maps', filename)
-    size = os.path.getsize(path)
+# @app.route('/static/maps/<path:filename>')
+# def serve_pmtiles(filename):
+#     file_path = os.path.join(app.root_path, 'static', 'maps', filename)
+#     file_size = os.path.getsize(file_path)
     
-    response = make_response(send_from_directory(os.path.join(app.root_path, 'static/maps'), filename, conditional=True))
+#     range_header = request.headers.get('Range', None)
     
-    # Force these headers to satisfy Mac/Unix byte-serving
-    response.headers['Cache-Control'] = 'public, max-age=31536000'
-    response.headers['Content-Length'] = str(size)
-    response.headers['Accept-Ranges'] = 'bytes'
-    response.headers['Content-Type'] = 'application/octet-stream'
+#     # If no range is requested (e.g., initial download), send the whole file
+#     if not range_header:
+#         response = make_response(send_from_directory(os.path.join(app.root_path, 'static/maps'), filename))
+#         response.headers['Content-Length'] = str(file_size)
+#         response.headers['Accept-Ranges'] = 'bytes'
+#         return response
+
+#     # Handle Range Request (The "Slicing" logic)
+#     try:
+#         # Parse 'bytes=0-1024'
+#         byte_range = range_header.replace('bytes=', '').split('-')
+#         start = int(byte_range[0])
+#         end = int(byte_range[1]) if byte_range[1] else file_size - 1
+        
+#         # Calculate the actual length of the slice
+#         length = end - start + 1
+
+#         with open(file_path, 'rb') as f:
+#             f.seek(start)
+#             data = f.read(length)
+
+#         rv = Response(data, 206, mimetype='application/octet-stream', direct_passthrough=True)
+#         rv.headers.add('Content-Range', f'bytes {start}-{end}/{file_size}')
+#         rv.headers.add('Accept-Ranges', 'bytes')
+#         # CRITICAL: Length must be the size of 'data', not 'file_size'
+#         rv.headers.add('Content-Length', str(length)) 
+#         print(str(length))
+#         return rv
+#     except Exception as e:
+#         return str(e), 500
+# @app.route('/static/maps/<path:filename>')
+# def serve_pmtiles(filename):
+#     path = os.path.join(app.root_path, 'static', 'maps', filename)
+#     size = os.path.getsize(path)
     
-    return response
+#     response = make_response(send_from_directory(os.path.join(app.root_path, 'static/maps'), filename, conditional=True))
+    
+#     # Force these headers to satisfy Mac/Unix byte-serving
+#     response.headers['Cache-Control'] = 'public, max-age=31536000'
+#     response.headers['Content-Length'] = str(size)
+#     response.headers['Accept-Ranges'] = 'bytes'
+#     response.headers['Content-Type'] = 'application/octet-stream'
+    
+#     return response
     # 'conditional=True' tells Flask to support HTTP Range Requests
     # response = send_from_directory(os.path.join(app.root_path, 'static/maps'), filename, conditional=True)
     # response.headers['Cache-Control'] = 'public, max-age=31536000'
@@ -127,6 +164,10 @@ def serve_pmtiles(filename):
     # response.headers['Content-Type'] = 'application/octet-stream'
 
     # return response
+
+@app.route('/static/maps/<path:filename>')
+def serve_pmtiles(filename):
+    return send_from_directory(os.path.join(app.root_path, 'static', 'maps'), filename, conditional=True)
 
 
 if __name__ == '__main__':

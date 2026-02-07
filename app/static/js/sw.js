@@ -155,3 +155,35 @@ self.addEventListener('fetch', (event) => {
     //     );
     // }
 });
+
+// self.addEventListener('fetch', (event) => {
+//     if (event.request.url.includes('pittsburgh-pa.pmtiles')) {
+//         event.respondWith((async () => {
+//             const cache = await caches.open('pittsburgh-map-v2');
+//             const cachedResponse = await cache.match(event.request.url);
+
+//             if (!cachedResponse) return fetch(event.request);
+
+//             const rangeHeader = event.request.headers.get('range');
+//             if (rangeHeader) {
+//                 const blob = await cachedResponse.blob();
+//                 const parts = rangeHeader.replace(/bytes=/, "").split("-");
+//                 const start = parseInt(parts[0], 10);
+//                 const end = parts[1] ? parseInt(parts[1], 10) : blob.size - 1;
+                
+//                 const slicedBlob = blob.slice(start, end + 1);
+//                 return new Response(slicedBlob, {
+//                     status: 206,
+//                     statusText: 'Partial Content',
+//                     headers: {
+//                         'Content-Type': 'application/octet-stream',
+//                         'Content-Range': `bytes ${start}-${end}/${blob.size}`,
+//                         'Accept-Ranges': 'bytes',
+//                         'Content-Length': slicedBlob.size // Matches the slice exactly
+//                     }
+//                 });
+//             }
+//             return cachedResponse;
+//         })());
+//     }
+// });
