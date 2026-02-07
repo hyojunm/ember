@@ -104,8 +104,10 @@ class Item(db.Model):
             'longitude': self.location.longitude,
             'address': self.location.address,
             'location_name': self.location.name,
+            'location_id': self.location_id,
             'owner_name': self.owner.username,
-            'picture': self.picture
+            'picture': self.picture,
+            'pickup_instructions': self.pickup_instructions
         }
 
 

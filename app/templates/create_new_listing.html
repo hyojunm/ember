@@ -106,49 +106,9 @@
                     Create Listing
                 </button>
 
-                <!-- My Items List -->
-                <div class="space-y-3">
-                    <!-- Item 1: DeWalt Drill -->
-                    <a href="/edit-listing" class="bg-white/90 backdrop-blur-md rounded-2xl p-4 shadow-lg flex items-center gap-4">
-                        <div class="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
-                            <img src="https://images.unsplash.com/photo-1504148455328-c376907d081c?w=200" alt="Drill" class="w-full h-full object-cover">
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="font-semibold text-gray-800 truncate">DeWalt Cordless Drill</h3>
-                            <div class="flex items-center gap-1.5 mt-1">
-                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                                <span class="text-xs text-gray-600 uppercase tracking-wide">Available</span>
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Item 2: Lawn Mower -->
-                    <a href="/edit-listing" class="bg-white/90 backdrop-blur-md rounded-2xl p-4 shadow-lg flex items-center gap-4">
-                        <div class="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
-                            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200" alt="Lawn Mower" class="w-full h-full object-cover">
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="font-semibold text-gray-800 truncate">Lawn Mower XR</h3>
-                            <div class="flex items-center gap-1.5 mt-1">
-                                <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                                <span class="text-xs text-gray-600 uppercase tracking-wide">Available</span>
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Item 3: KitchenAid Mixer -->
-                    <a href="/edit-listing" class="bg-white/90 backdrop-blur-md rounded-2xl p-4 shadow-lg flex items-center gap-4">
-                        <div class="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0">
-                            <img src="https://images.unsplash.com/photo-1578269174936-2709b6aeb913?w=200" alt="Mixer" class="w-full h-full object-cover">
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="font-semibold text-gray-800 truncate">KitchenAid Mixer</h3>
-                            <div class="flex items-center gap-1.5 mt-1">
-                                <div class="w-2 h-2 bg-orange-500 rounded-full"></div>
-                                <span class="text-xs text-orange-600 uppercase tracking-wide">Currently Lent</span>
-                            </div>
-                        </div>
-                    </a>
+                <!-- My Items List (loaded dynamically) -->
+                <div id="myItemsList" class="space-y-3">
+                    <p class="text-center text-gray-400 py-4">Loading your items...</p>
                 </div>
             </aside>
 
@@ -424,8 +384,67 @@
             }
         });
 
-        // Load locations on page load
+        // Sidebar: load current user's items
+        const SIDEBAR_ICONS = {
+            'icon-tools': '<svg class="w-8 h-8 text-orange-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M12.316 3.051a1 1 0 01.633 1.265l-4 12a1 1 0 11-1.898-.632l4-12a1 1 0 011.265-.633z" clip-rule="evenodd"/></svg>',
+            'icon-kitchen': '<svg class="w-8 h-8 text-orange-400" fill="currentColor" viewBox="0 0 20 20"><path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3z"/></svg>',
+            'icon-garden': '<svg class="w-8 h-8 text-orange-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.5 2a3.5 3.5 0 101.665 6.58L8.585 10l-1.42 1.42a3.5 3.5 0 101.414 1.414l8.128-8.127a1 1 0 00-1.414-1.414L10 8.586 8.58 7.165A3.5 3.5 0 005.5 2z" clip-rule="evenodd"/></svg>',
+            'icon-electronics': '<svg class="w-8 h-8 text-orange-400" fill="currentColor" viewBox="0 0 20 20"><path d="M2 5a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V5z"/></svg>',
+            'icon-sports': '<svg class="w-8 h-8 text-orange-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16z" clip-rule="evenodd"/></svg>',
+            'icon-other': '<svg class="w-8 h-8 text-orange-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7 2a1 1 0 00-.707 1.707L7 4.414v3.758a1 1 0 01-.293.707l-4 4C.817 14.769 2.156 18 4.828 18h10.343c2.673 0 4.012-3.231 2.122-5.121l-4-4A1 1 0 0113 8.172V4.414l.707-.707A1 1 0 0013 2H7z" clip-rule="evenodd"/></svg>'
+        };
+
+        function _escHtml(str) {
+            var d = document.createElement('div');
+            d.textContent = str || '';
+            return d.innerHTML;
+        }
+
+        async function loadMyItems() {
+            try {
+                var response = await fetch('/api/my-items');
+                if (!response.ok) {
+                    document.getElementById('myItemsList').innerHTML = '<p class="text-center text-gray-400 py-4">No items yet.</p>';
+                    return;
+                }
+                var items = await response.json();
+                var container = document.getElementById('myItemsList');
+                if (items.length === 0) {
+                    container.innerHTML = '<p class="text-center text-gray-400 py-4">No items yet. Create your first listing!</p>';
+                    return;
+                }
+                var html = '';
+                items.forEach(function(item) {
+                    var isIcon = item.picture && item.picture.startsWith('icon-');
+                    var thumb = '';
+                    if (item.picture && !isIcon) {
+                        thumb = '<img src="/static/uploads/' + _escHtml(item.picture) + '" alt="' + _escHtml(item.name) + '" class="w-full h-full object-cover">';
+                    } else {
+                        thumb = SIDEBAR_ICONS[item.picture] || SIDEBAR_ICONS['icon-other'];
+                    }
+                    var dotClass = item.available ? 'bg-green-500' : 'bg-orange-500';
+                    var statusText = item.available ? 'Available' : 'Currently Lent';
+                    var statusClass = item.available ? 'text-gray-600' : 'text-orange-600';
+                    html += '<a href="/edit-listing/' + item.id + '" class="bg-white/90 backdrop-blur-md rounded-2xl p-4 shadow-lg flex items-center gap-4 hover:bg-white transition-colors">';
+                    html += '  <div class="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center">' + thumb + '</div>';
+                    html += '  <div class="flex-1 min-w-0">';
+                    html += '    <h3 class="font-semibold text-gray-800 truncate">' + _escHtml(item.name) + '</h3>';
+                    html += '    <div class="flex items-center gap-1.5 mt-1">';
+                    html += '      <div class="w-2 h-2 ' + dotClass + ' rounded-full"></div>';
+                    html += '      <span class="text-xs ' + statusClass + ' uppercase tracking-wide">' + statusText + '</span>';
+                    html += '    </div>';
+                    html += '  </div>';
+                    html += '</a>';
+                });
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading items:', error);
+            }
+        }
+
+        // Load locations and items on page load
         loadSavedLocations();
+        loadMyItems();
     </script>
 </body>
 </html>

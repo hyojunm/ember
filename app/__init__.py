@@ -50,9 +50,9 @@ def create_listing():
         return redirect(url_for("users.login"))
     return render_template('create_new_listing.html')
 
-@app.route('/edit-listing')
-def edit_listing():
-    return render_template('edit_item.html')
+@app.route('/edit-listing/<int:item_id>')
+def edit_listing(item_id):
+    return render_template('edit_item.html', item_id=item_id)
 
 @app.route('/account-info')
 def account_info():

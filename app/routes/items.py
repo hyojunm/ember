@@ -29,6 +29,14 @@ def get_category_icon(category_name):
     return CATEGORY_ICONS.get(category_name, 'icon-other')
 
 
+@bp.route('/api/my-items', methods=['GET'])
+@login_required
+def get_my_items():
+    """Get all items belonging to the current user"""
+    items = Item.query.filter_by(user_id=current_user.id).all()
+    return jsonify([item.to_dict() for item in items]), 200
+
+
 @bp.route('/api/items/<int:item_id>', methods=['GET'])
 def get_item(item_id):
     """Get a single item by ID"""
